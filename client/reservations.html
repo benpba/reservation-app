@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Reservations</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    .res-card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+    nav a { margin-right: 16px; }
+    button { padding: 6px 12px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="tables.html">Book a Table</a>
+    <a href="reservations.html">My Reservations</a>
+    <a href="#" id="logoutLink">Logout</a>
+  </nav>
+  <h2>My Reservations</h2>
+  <div id="resList"></div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'index.html';
+
+    document.getElementById('logoutLink').onclick = () => {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    };
+
+    async function loadReservations() {
+      const res = await fetch('/reservations', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const listEl = document.getElementById('resList');
+      listEl.innerHTML = '';
+      if (data.length === 0) { listEl.textContent = 'No reservations yet.'; return; }
+      data.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'res-card';
+        const dateStr = r.reservation_date.split('T')[0];
+        card.innerHTML = `<span>Table ${r.table_number} — ${dateStr} at ${r.reservation_time} — ${r.party_size} guests — ${r.status}</span>`;
+        if (r.status === 'confirmed') {
+          const btn = document.createElement('button');
+          btn.textContent = 'Cancel';
+          btn.onclick = () => cancelReservation(r.id);
+          card.appendChild(btn);
+        }
+        listEl.appendChild(card);
+      });
+    }
+
+    async function cancelReservation(id) {
+      await fetch(`/reservations/${id}/cancel`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      loadReservations();
+    }
+
+    loadReservations();
+  </script>
+</body>
+</html>

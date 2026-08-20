@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Restaurant Reservations</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 60px auto; padding: 0 20px; }
+    input { display: block; width: 100%; margin: 8px 0; padding: 8px; }
+    button { padding: 8px 16px; margin-top: 8px; }
+    .error { color: red; }
+    .toggle { margin-top: 16px; cursor: pointer; color: blue; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h2 id="formTitle">Login</h2>
+  <div id="registerFields" style="display:none;">
+    <input id="name" placeholder="Name" />
+  </div>
+  <input id="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Password" />
+  <button id="submitBtn">Login</button>
+  <p class="error" id="errorMsg"></p>
+  <p class="toggle" id="toggleMode">Need an account? Register</p>
+
+  <script>
+    const API = '';
+    let mode = 'login';
+
+    document.getElementById('toggleMode').onclick = () => {
+      mode = mode === 'login' ? 'register' : 'login';
+      document.getElementById('formTitle').textContent = mode === 'login' ? 'Login' : 'Register';
+      document.getElementById('submitBtn').textContent = mode === 'login' ? 'Login' : 'Register';
+      document.getElementById('registerFields').style.display = mode === 'register' ? 'block' : 'none';
+      document.getElementById('toggleMode').textContent = mode === 'login' ? 'Need an account? Register' : 'Already have an account? Login';
+      document.getElementById('errorMsg').textContent = '';
+    };
+
+    document.getElementById('submitBtn').onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = '';
+
+      try {
+        if (mode === 'register') {
+          const name = document.getElementById('name').value;
+          const res = await fetch(`${API}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+          });
+          const data = await res.json();
+          if (!res.ok) { errorMsg.textContent = data.error; return; }
+          alert('Registered! Now log in.');
+          document.getElementById('toggleMode').click();
+        } else {
+          const res = await fetch(`${API}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await res.json();
+          if (!res.ok) { errorMsg.textContent = data.error; return; }
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userName', data.user.name);
+          window.location.href = 'tables.html';
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Something went wrong. Try again.';
+      }
+    };
+  </script>
+</body>
+</html>
