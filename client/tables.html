@@ -13,10 +13,8 @@
     <a href="reservations.html">My reservations</a>
     <a href="#" id="logoutLink">Log out</a>
   </nav>
-
   <h2>Welcome, <span id="userName"></span></h2>
   <p class="subtitle">Pick a date and time to see what's open.</p>
-
   <div class="filters">
     <div>
       <label for="date">Date</label>
@@ -27,20 +25,16 @@
       <select id="time"></select>
     </div>
   </div>
-
   <div id="tableList"></div>
   <p class="error" id="statusMsg"></p>
-
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'index.html';
     document.getElementById('userName').textContent = localStorage.getItem('userName') || '';
-
     document.getElementById('logoutLink').onclick = () => {
       localStorage.clear();
       window.location.href = 'index.html';
     };
-
     const timeSelect = document.getElementById('time');
     for (let h = 12; h <= 22; h++) {
       const value = `${String(h).padStart(2, '0')}:00:00`;
@@ -51,7 +45,6 @@
       if (h === 18) opt.selected = true;
       timeSelect.appendChild(opt);
     }
-
     async function loadTables() {
       const res = await fetch('/tables');
       const tables = await res.json();
@@ -66,39 +59,21 @@
             <span class="meta">${t.seats} seats</span>
           </div>
         `;
-        const actions = document.createElement('div');
-        actions.className = 'actions';
-
-        const partyInput = document.createElement('input');
-        partyInput.type = 'number';
-        partyInput.className = 'party-input';
-        partyInput.min = 1;
-        partyInput.max = t.seats;
-        partyInput.value = Math.min(2, t.seats);
-
         const btn = document.createElement('button');
         btn.textContent = 'Book';
-        btn.onclick = () => bookTable(t.id, t.seats, partyInput.value);
-
-        actions.appendChild(partyInput);
-        actions.appendChild(btn);
-        card.appendChild(actions);
+        btn.onclick = () => bookTable(t.id, t.seats);
+        card.appendChild(btn);
         listEl.appendChild(card);
       });
     }
-
-    async function bookTable(table_id, seats, party_size) {
+    async function bookTable(table_id, seats) {
       const date = document.getElementById('date').value;
       const time = document.getElementById('time').value;
       const statusMsg = document.getElementById('statusMsg');
       statusMsg.style.color = 'var(--danger)';
-
       if (!date) { statusMsg.textContent = 'Pick a date first.'; return; }
-      if (!party_size || party_size < 1 || party_size > seats) {
-        statusMsg.textContent = `Party size must be between 1 and ${seats}.`;
-        return;
-      }
-
+      const party_size = prompt(`Party size (max ${seats}):`, '2');
+      if (!party_size) return;
       const res = await fetch('/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -109,7 +84,6 @@
       statusMsg.style.color = 'var(--gold)';
       statusMsg.textContent = 'Booked. Check My Reservations.';
     }
-
     loadTables();
   </script>
 </body>
