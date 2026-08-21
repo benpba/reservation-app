@@ -69,6 +69,28 @@ input, select {
   font-size: 0.95rem;
   margin: 6px 0 16px;
 }
+
+.password-wrap {
+  position: relative;
+}
+.password-wrap input {
+  padding-right: 44px;
+}
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-60%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--sage);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.password-toggle:hover { color: var(--ivory); }
+
 input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;

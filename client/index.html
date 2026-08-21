@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Restaurant Reservations</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 </head>
 <body>
   <nav><span class="brand">Book Table</span></nav>
-
   <h2 id="formTitle">Welcome back</h2>
   <p class="subtitle" id="formSubtitle">Log in to manage your reservations.</p>
-
   <div id="registerFields" style="display:none;">
     <label for="name">Name</label>
     <input id="name" placeholder="Your full name" />
@@ -19,16 +18,16 @@
   <label for="email">Email</label>
   <input id="email" placeholder="you@example.com" />
   <label for="password">Password</label>
+<div class="password-wrap">
   <input id="password" type="password" placeholder="••••••••" />
-
+  <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password"><i class="bi bi-eye"></i></button>
+</div>
   <button id="submitBtn" style="width:100%;">Log in</button>
   <p class="error" id="errorMsg"></p>
   <p class="toggle" id="toggleMode">Need an account? Register</p>
-
   <script>
     const API = '';
     let mode = 'login';
-
     document.getElementById('toggleMode').onclick = () => {
       mode = mode === 'login' ? 'register' : 'login';
       document.getElementById('formTitle').textContent = mode === 'login' ? 'Welcome back' : 'Create your account';
@@ -38,13 +37,11 @@
       document.getElementById('toggleMode').textContent = mode === 'login' ? 'Need an account? Register' : 'Already have an account? Log in';
       document.getElementById('errorMsg').textContent = '';
     };
-
     document.getElementById('submitBtn').onclick = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const errorMsg = document.getElementById('errorMsg');
       errorMsg.textContent = '';
-
       try {
         if (mode === 'register') {
           const name = document.getElementById('name').value;
@@ -73,6 +70,16 @@
         errorMsg.textContent = 'Something went wrong. Try again.';
       }
     };
+
+    document.getElementById('togglePassword').onclick = () => {
+  const pwInput = document.getElementById('password');
+  const icon = document.querySelector('#togglePassword i');
+  const btn = document.getElementById('togglePassword');
+  const isHidden = pwInput.type === 'password';
+  pwInput.type = isHidden ? 'text' : 'password';
+  icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+  btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+};
   </script>
 </body>
 </html>
