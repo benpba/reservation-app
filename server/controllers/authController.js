@@ -4,20 +4,22 @@ const pool = require('../config/db');
 
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password) {
+  const trimmedEmail = email ? email.trim() : email;
+
+  if (!name || !trimmedEmail || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
   }
   try {
-    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [trimmedEmail]);
     if (existing.length > 0) {
       return res.status(409).json({ error: 'Email already registered' });
     }
     const hash = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
       'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
-      [name, email, hash]
+      [name, trimmedEmail, hash]
     );
-    res.status(201).json({ id: result.insertId, name, email });
+    res.status(201).json({ id: result.insertId, name, email: trimmedEmail });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Registration failed' });
@@ -26,11 +28,13 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
+  const trimmedEmail = email ? email.trim() : email;
+
+  if (!trimmedEmail || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
   try {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [trimmedEmail]);
     if (rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }

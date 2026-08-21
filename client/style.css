@@ -116,11 +116,19 @@ button.ghost:hover { background: var(--danger-bg); }
 
 .filters {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: flex-end;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
-.filters > div { flex: 1; }
+.filters > div {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+.filters input, .filters select {
+  width: 100%;
+  min-width: 0;
+}
 
 .card {
   position: relative;
@@ -166,6 +174,18 @@ button.ghost:hover { background: var(--danger-bg); }
   padding: 40px 0;
   text-align: center;
   font-style: italic;
+}
+
+.card .party-input {
+  width: 56px;
+  padding: 8px;
+  margin: 0 8px 0 0;
+  text-align: center;
+  display: inline-block;
+}
+.card .actions {
+  display: flex;
+  align-items: center;
 }
 
 @media (prefers-reduced-motion: reduce) {

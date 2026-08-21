@@ -41,7 +41,6 @@
       window.location.href = 'index.html';
     };
 
-    // Populate hourly time slots from 12:00 to 22:00
     const timeSelect = document.getElementById('time');
     for (let h = 12; h <= 22; h++) {
       const value = `${String(h).padStart(2, '0')}:00:00`;
@@ -67,23 +66,38 @@
             <span class="meta">${t.seats} seats</span>
           </div>
         `;
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+
+        const partyInput = document.createElement('input');
+        partyInput.type = 'number';
+        partyInput.className = 'party-input';
+        partyInput.min = 1;
+        partyInput.max = t.seats;
+        partyInput.value = Math.min(2, t.seats);
+
         const btn = document.createElement('button');
         btn.textContent = 'Book';
-        btn.onclick = () => bookTable(t.id, t.seats);
-        card.appendChild(btn);
+        btn.onclick = () => bookTable(t.id, t.seats, partyInput.value);
+
+        actions.appendChild(partyInput);
+        actions.appendChild(btn);
+        card.appendChild(actions);
         listEl.appendChild(card);
       });
     }
 
-    async function bookTable(table_id, seats) {
+    async function bookTable(table_id, seats, party_size) {
       const date = document.getElementById('date').value;
       const time = document.getElementById('time').value;
       const statusMsg = document.getElementById('statusMsg');
       statusMsg.style.color = 'var(--danger)';
-      if (!date) { statusMsg.textContent = 'Pick a date first.'; return; }
 
-      const party_size = prompt(`Party size (max ${seats}):`, '2');
-      if (!party_size) return;
+      if (!date) { statusMsg.textContent = 'Pick a date first.'; return; }
+      if (!party_size || party_size < 1 || party_size > seats) {
+        statusMsg.textContent = `Party size must be between 1 and ${seats}.`;
+        return;
+      }
 
       const res = await fetch('/reservations', {
         method: 'POST',
