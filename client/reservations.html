@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Reservations</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 </head>
 <body>
   <nav>
@@ -51,12 +52,19 @@
           </div>
         `;
         if (r.status === 'confirmed') {
-          const btn = document.createElement('button');
-          btn.className = 'ghost';
-          btn.textContent = 'Cancel';
-          btn.onclick = () => cancelReservation(r.id);
-          card.appendChild(btn);
-        }
+  const btn = document.createElement('button');
+  btn.className = 'ghost';
+  btn.textContent = 'Cancel';
+  btn.onclick = () => cancelReservation(r.id);
+  card.appendChild(btn);
+} else if (r.status === 'cancelled') {
+  const delBtn = document.createElement('button');
+  delBtn.className = 'ghost';
+  delBtn.setAttribute('aria-label', 'Delete reservation');
+  delBtn.innerHTML = '<i class="bi bi-trash"></i>';
+  delBtn.onclick = () => deleteReservation(r.id);
+  card.appendChild(delBtn);
+}
         listEl.appendChild(card);
       });
     }
@@ -68,6 +76,14 @@
       });
       loadReservations();
     }
+    async function deleteReservation(id) {
+  if (!confirm('Permanently delete this reservation?')) return;
+  await fetch(`/reservations/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  loadReservations();
+}
 
     loadReservations();
   </script>
