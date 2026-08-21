@@ -1,38 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Book a Table</title>
-  <style>
-    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
-    .table-card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; }
-    .table-card.booked { background: #fee; }
-    .table-card.available { background: #efe; }
-    button { padding: 6px 12px; }
-    nav a { margin-right: 16px; }
-    input, select { padding: 6px; margin: 4px 0; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <nav>
-    <a href="tables.html">Book a Table</a>
-    <a href="reservations.html">My Reservations</a>
-    <a href="#" id="logoutLink">Logout</a>
+    <span class="brand">Table Book</span>
+    <a href="tables.html" class="active">Book</a>
+    <a href="reservations.html">My reservations</a>
+    <a href="#" id="logoutLink">Log out</a>
   </nav>
-  <h2>Welcome, <span id="userName"></span></h2>
 
-  <label>Date: <input type="date" id="date" /></label>
-  <label>Time:
-    <select id="time">
-      <option value="17:00:00">17:00</option>
-      <option value="18:00:00">18:00</option>
-      <option value="19:00:00">19:00</option>
-      <option value="20:00:00">20:00</option>
-      <option value="21:00:00">21:00</option>
-    </select>
-  </label>
+  <h2>Welcome, <span id="userName"></span></h2>
+  <p class="subtitle">Pick a date and time to see what's open.</p>
+
+  <div class="filters">
+    <div>
+      <label for="date">Date</label>
+      <input type="date" id="date" />
+    </div>
+    <div>
+      <label for="time">Time</label>
+      <select id="time"></select>
+    </div>
+  </div>
 
   <div id="tableList"></div>
-  <p id="statusMsg"></p>
+  <p class="error" id="statusMsg"></p>
 
   <script>
     const token = localStorage.getItem('token');
@@ -44,6 +41,18 @@
       window.location.href = 'index.html';
     };
 
+    // Populate hourly time slots from 12:00 to 22:00
+    const timeSelect = document.getElementById('time');
+    for (let h = 12; h <= 22; h++) {
+      const value = `${String(h).padStart(2, '0')}:00:00`;
+      const label = `${String(h).padStart(2, '0')}:00`;
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = label;
+      if (h === 18) opt.selected = true;
+      timeSelect.appendChild(opt);
+    }
+
     async function loadTables() {
       const res = await fetch('/tables');
       const tables = await res.json();
@@ -51,8 +60,13 @@
       listEl.innerHTML = '';
       tables.forEach(t => {
         const card = document.createElement('div');
-        card.className = 'table-card available';
-        card.innerHTML = `<span>Table ${t.table_number} — ${t.seats} seats</span>`;
+        card.className = 'card';
+        card.innerHTML = `
+          <div>
+            <span class="badge">Table ${t.table_number}</span>
+            <span class="meta">${t.seats} seats</span>
+          </div>
+        `;
         const btn = document.createElement('button');
         btn.textContent = 'Book';
         btn.onclick = () => bookTable(t.id, t.seats);
@@ -65,6 +79,7 @@
       const date = document.getElementById('date').value;
       const time = document.getElementById('time').value;
       const statusMsg = document.getElementById('statusMsg');
+      statusMsg.style.color = 'var(--danger)';
       if (!date) { statusMsg.textContent = 'Pick a date first.'; return; }
 
       const party_size = prompt(`Party size (max ${seats}):`, '2');
@@ -77,7 +92,8 @@
       });
       const data = await res.json();
       if (!res.ok) { statusMsg.textContent = data.error; return; }
-      statusMsg.textContent = 'Booked! Check My Reservations.';
+      statusMsg.style.color = 'var(--gold)';
+      statusMsg.textContent = 'Booked. Check My Reservations.';
     }
 
     loadTables();
